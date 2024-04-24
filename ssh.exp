@@ -1,0 +1,40 @@
+#!/usr/bin/expect
+
+# 输入参数
+set i [lindex $argv 0]
+set line [lindex $argv 1]
+
+# 登录SSH主机
+spawn ssh root@$line
+
+# 期望匹配密码提示
+expect {
+    "*password:" {
+        send "\r"
+        exp_continue
+    }
+    "*yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+}
+
+# 登录成功后执行操作
+expect {
+    "*#" {
+        send "cd simple-taiko-node/\r"
+        expect "*#"
+        
+        send "mv ${i} 1.sh\r"
+        expect "*#"
+
+        # 执行脚本
+        send "bash 1.sh\r"
+        expect "*#"
+    }
+}
+
+# 退出SSH连接
+send "exit\r"
+expect eof
+
